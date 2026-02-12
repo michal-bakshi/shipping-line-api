@@ -182,6 +182,10 @@ To check formatting without changing files:
 | `docker compose -f docker/docker-compose.yml up -d`   | Start PostgreSQL   |
 | `docker compose -f docker/docker-compose.yml down -v`  | Stop + delete data |
 
+## Contributing
+
+Ready to pick up a task? See [CONTRIBUTING.md](CONTRIBUTING.md) for workflow, branch naming, and PR guidelines. Open issues are listed in [ISSUES.md](ISSUES.md).
+
 ## Tips for Contributors
 
 - **Don't skip the DTO layer** — never expose JPA entities directly in REST responses.
