@@ -1,6 +1,5 @@
 package com.shipping.freightops.dto;
 
-import com.shipping.freightops.entity.FreightOrder;
 import com.shipping.freightops.entity.Vessel;
 
 public class VesselResponse {

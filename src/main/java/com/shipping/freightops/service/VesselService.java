@@ -1,16 +1,12 @@
 package com.shipping.freightops.service;
 
 import com.shipping.freightops.dto.CreateVesselRequest;
-import com.shipping.freightops.dto.VesselResponse;
-import com.shipping.freightops.entity.FreightOrder;
 import com.shipping.freightops.entity.Vessel;
 import com.shipping.freightops.repository.VesselRepository;
-import com.shipping.freightops.repository.VoyageRepository;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class VesselService {

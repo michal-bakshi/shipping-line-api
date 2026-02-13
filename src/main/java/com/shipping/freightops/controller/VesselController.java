@@ -1,22 +1,17 @@
 package com.shipping.freightops.controller;
 
-import com.shipping.freightops.dto.CreateFreightOrderRequest;
 import com.shipping.freightops.dto.CreateVesselRequest;
-import com.shipping.freightops.dto.FreightOrderResponse;
 import com.shipping.freightops.dto.VesselResponse;
-import com.shipping.freightops.entity.FreightOrder;
 import com.shipping.freightops.entity.Vessel;
-import com.shipping.freightops.service.FreightOrderService;
 import com.shipping.freightops.service.VesselService;
 import jakarta.validation.Valid;
+import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
-import java.util.List;
-
 @RestController
-@RequestMapping("/api/v1/vessels ")
+@RequestMapping("/api/v1/vessels")
 public class VesselController {
   private final VesselService service;
 
