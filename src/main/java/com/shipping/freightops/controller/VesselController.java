@@ -10,6 +10,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/** REST controller for vessel management. */
 @RestController
 @RequestMapping("/api/v1/vessels")
 public class VesselController {
@@ -19,6 +20,7 @@ public class VesselController {
     this.service = service;
   }
 
+  /** Create a new vessel. */
   @PostMapping
   public ResponseEntity<VesselResponse> create(@Valid @RequestBody CreateVesselRequest request) {
     Vessel vessel = service.createVessel(request);
@@ -27,6 +29,7 @@ public class VesselController {
     return ResponseEntity.created(location).body(body);
   }
 
+  /** List all vessels. */
   @GetMapping
   public ResponseEntity<List<VesselResponse>> list() {
     List<Vessel> vessels = service.getAllVessels();
@@ -35,6 +38,7 @@ public class VesselController {
     return ResponseEntity.ok(body);
   }
 
+  /** Get a vessel by its ID. */
   @GetMapping("/{id}")
   public ResponseEntity<VesselResponse> getById(@PathVariable Long id) {
     Vessel vessel = service.getVessel(id);
