@@ -3,13 +3,15 @@ package com.shipping.freightops.repository;
 import com.shipping.freightops.entity.FreightOrder;
 import com.shipping.freightops.enums.OrderStatus;
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FreightOrderRepository extends JpaRepository<FreightOrder, Long> {
 
-  List<FreightOrder> findByVoyageId(Long voyageId);
+  Page<FreightOrder> findByVoyageId(Long voyageId, Pageable pageable);
 
-  List<FreightOrder> findByStatus(OrderStatus status);
-
-  List<FreightOrder> findByOrderedBy(String orderedBy);
+  Page<FreightOrder> findByStatus(OrderStatus status, Pageable pageable);
+  Page<FreightOrder> findByOrderedBy(String orderedBy, Pageable pageable);
 }

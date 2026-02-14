@@ -2,11 +2,16 @@ package com.shipping.freightops.controller;
 
 import com.shipping.freightops.dto.CreateFreightOrderRequest;
 import com.shipping.freightops.dto.FreightOrderResponse;
+import com.shipping.freightops.dto.PageResponse;
 import com.shipping.freightops.entity.FreightOrder;
 import com.shipping.freightops.service.FreightOrderService;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,13 +56,15 @@ public class FreightOrderController {
 
   /** List all freight orders, optionally filtered by voyage. */
   @GetMapping
-  public ResponseEntity<List<FreightOrderResponse>> list(
-      @RequestParam(required = false) Long voyageId) {
-    List<FreightOrder> orders =
-        (voyageId != null) ? service.getOrdersByVoyage(voyageId) : service.getAllOrders();
+  public ResponseEntity<PageResponse<FreightOrderResponse>> list(
+      @RequestParam(required = false) Long voyageId,
+      @PageableDefault(size = 20) Pageable pageable) {
+    Page<FreightOrder> orders =
+        (voyageId != null)
+            ? service.getOrdersByVoyage(voyageId, pageable)
+            : service.getAllOrders(pageable);
 
-    List<FreightOrderResponse> body =
-        orders.stream().map(FreightOrderResponse::fromEntity).toList();
-    return ResponseEntity.ok(body);
+    Page<FreightOrderResponse> mapped = orders.map(FreightOrderResponse::fromEntity);
+    return ResponseEntity.ok(PageResponse.from(mapped));
   }
 }
