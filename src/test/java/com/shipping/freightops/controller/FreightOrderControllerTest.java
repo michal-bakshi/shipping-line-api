@@ -10,7 +10,12 @@ import com.shipping.freightops.dto.CreateFreightOrderRequest;
 import com.shipping.freightops.entity.*;
 import com.shipping.freightops.enums.ContainerSize;
 import com.shipping.freightops.enums.ContainerType;
-import com.shipping.freightops.repository.*;
+import com.shipping.freightops.enums.OrderStatus;
+import com.shipping.freightops.repository.ContainerRepository;
+import com.shipping.freightops.repository.FreightOrderRepository;
+import com.shipping.freightops.repository.PortRepository;
+import com.shipping.freightops.repository.VesselRepository;
+import com.shipping.freightops.repository.VoyageRepository;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +25,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Integration test for {@link FreightOrderController}.
@@ -29,6 +35,7 @@ import org.springframework.test.web.servlet.MockMvc;
  */
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class FreightOrderControllerTest {
 
   @Autowired private MockMvc mockMvc;
@@ -117,11 +124,111 @@ class FreightOrderControllerTest {
   }
 
   @Test
-  @DisplayName("GET /api/v1/freight-orders → 200 OK with list")
+  @DisplayName("GET /api/v1/freight-orders → 200 OK with paged result")
   void listOrders_returnsOk() throws Exception {
+    int totalOrders = 25;
+    int pageSize = 10;
+
+    for (int i = 0; i < totalOrders; i++) {
+      FreightOrder order = new FreightOrder();
+      order.setVoyage(savedVoyage);
+      order.setContainer(savedContainer);
+      order.setOrderedBy("user-" + i);
+      order.setNotes("order-" + i);
+      order.setStatus(OrderStatus.PENDING);
+
+      freightOrderRepository.save(order);
+    }
+    mockMvc
+        .perform(
+            get("/api/v1/freight-orders")
+                .param("page", "0")
+                .param("size", String.valueOf(pageSize)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content.length()").value(pageSize))
+        .andExpect(jsonPath("$.page").value(0))
+        .andExpect(jsonPath("$.size").value(pageSize))
+        .andExpect(jsonPath("$.totalElements").value(totalOrders))
+        .andExpect(jsonPath("$.totalPages").value(3));
+  }
+
+  @Test
+  @DisplayName("GET /api/v1/freight-orders without PageSize →  200 OK with default pageSize of 20")
+  void listOrders_withoutPageSize_returnsOk() throws Exception {
+    int totalOrders = 25;
+
+    for (int i = 0; i < totalOrders; i++) {
+      FreightOrder order = new FreightOrder();
+      order.setVoyage(savedVoyage);
+      order.setContainer(savedContainer);
+      order.setOrderedBy("user-" + i);
+      order.setNotes("order-" + i);
+      order.setStatus(OrderStatus.PENDING);
+
+      freightOrderRepository.save(order);
+    }
+    mockMvc
+        .perform(get("/api/v1/freight-orders").param("page", "0"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content.length()").value(20))
+        .andExpect(jsonPath("$.page").value(0))
+        .andExpect(jsonPath("$.size").value(20))
+        .andExpect(jsonPath("$.totalElements").value(totalOrders))
+        .andExpect(jsonPath("$.totalPages").value(2));
+  }
+
+  @Test
+  @DisplayName("GET /api/v1/freight-orders without Page →  200 OK with default page of 0")
+  void listOrders_withoutPage_returnsOk() throws Exception {
+    int totalOrders = 25;
+
+    for (int i = 0; i < totalOrders; i++) {
+      FreightOrder order = new FreightOrder();
+      order.setVoyage(savedVoyage);
+      order.setContainer(savedContainer);
+      order.setOrderedBy("user-" + i);
+      order.setNotes("order-" + i);
+      order.setStatus(OrderStatus.PENDING);
+
+      freightOrderRepository.save(order);
+    }
     mockMvc
         .perform(get("/api/v1/freight-orders"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$").isArray());
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content.length()").value(20))
+        .andExpect(jsonPath("$.page").value(0))
+        .andExpect(jsonPath("$.size").value(20))
+        .andExpect(jsonPath("$.totalElements").value(totalOrders))
+        .andExpect(jsonPath("$.totalPages").value(2));
+  }
+
+  @Test
+  @DisplayName(
+      "GET /api/v1/freight-orders pageSize bt 100 → 200 OK with default max pageSize of 100")
+  void listOrders_pageSize101_returnsOk() throws Exception {
+    int totalOrders = 25;
+
+    for (int i = 0; i < totalOrders; i++) {
+      FreightOrder order = new FreightOrder();
+      order.setVoyage(savedVoyage);
+      order.setContainer(savedContainer);
+      order.setOrderedBy("user-" + i);
+      order.setNotes("order-" + i);
+      order.setStatus(OrderStatus.PENDING);
+
+      freightOrderRepository.save(order);
+    }
+    mockMvc
+        .perform(get("/api/v1/freight-orders").param("page", "0").param("size", "101"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content.length()").value(totalOrders))
+        .andExpect(jsonPath("$.page").value(0))
+        .andExpect(jsonPath("$.size").value(100))
+        .andExpect(jsonPath("$.totalElements").value(totalOrders))
+        .andExpect(jsonPath("$.totalPages").value(1));
   }
 }
