@@ -5,6 +5,9 @@ import com.shipping.freightops.dto.FreightOrderResponse;
 import com.shipping.freightops.dto.PageResponse;
 import com.shipping.freightops.entity.FreightOrder;
 import com.shipping.freightops.service.FreightOrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.data.domain.Page;
@@ -36,6 +39,13 @@ public class FreightOrderController {
   }
 
   /** Create a new freight order. */
+  @Operation(summary = "Create a new freight order")
+  @ApiResponses({
+    @ApiResponse(responseCode = "201", description = "Freight order successfully created"),
+    @ApiResponse(responseCode = "400", description = "Invalid request data"),
+    @ApiResponse(responseCode = "404", description = "Voyage or Container not found"),
+    @ApiResponse(responseCode = "409", description = "Cannot book freight on a cancelled voyage")
+  })
   @PostMapping
   public ResponseEntity<FreightOrderResponse> create(
       @Valid @RequestBody CreateFreightOrderRequest request) {
@@ -46,6 +56,11 @@ public class FreightOrderController {
   }
 
   /** Get a single freight order by ID. */
+  @Operation(summary = "Get freight order by ID")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "Freight order found"),
+    @ApiResponse(responseCode = "404", description = "Freight order not found")
+  })
   @GetMapping("/{id}")
   public ResponseEntity<FreightOrderResponse> getById(@PathVariable Long id) {
     FreightOrder order = service.getOrder(id);
@@ -53,6 +68,10 @@ public class FreightOrderController {
   }
 
   /** List all freight orders, optionally filtered by voyage. */
+  @Operation(summary = "List all freight orders with optional voyage filter")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "Paged list of freight orders returned")
+  })
   @GetMapping
   public ResponseEntity<PageResponse<FreightOrderResponse>> list(
       @RequestParam(required = false) Long voyageId,

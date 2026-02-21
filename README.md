@@ -100,6 +100,18 @@ Tests use an **H2 in-memory database** — no PostgreSQL needed.
 
 Look at `FreightOrderControllerTest.java` for a working example of how to write integration tests with MockMvc and JUnit 5 (Jupiter).
 
+## API Documentation (Swagger UI)
+
+The API is documented with **OpenAPI/Swagger**. Once the application is running, you can access the interactive Swagger UI at:
+**http://localhost:8080/swagger-ui/index.html**
+
+
+From there, you can explore endpoints, see request/response schemas, and try out the API directly from the browser.
+
+💡 Note: The older `/swagger-ui.html` path is automatically redirected to `/swagger-ui/index.html`.
+
+
+
 ## Project Structure
 
 ```
