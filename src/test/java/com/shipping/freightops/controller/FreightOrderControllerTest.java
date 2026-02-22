@@ -1,15 +1,16 @@
 package com.shipping.freightops.controller;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shipping.freightops.dto.CreateFreightOrderRequest;
+import com.shipping.freightops.dto.UpdateDiscountRequest;
 import com.shipping.freightops.entity.*;
 import com.shipping.freightops.enums.ContainerSize;
 import com.shipping.freightops.enums.ContainerType;
+import com.shipping.freightops.enums.OrderStatus;
 import com.shipping.freightops.repository.*;
 import com.shipping.freightops.service.FreightOrderService;
 import java.math.BigDecimal;
@@ -235,5 +236,95 @@ class FreightOrderControllerTest {
         .andExpect(jsonPath("$.size").value(100))
         .andExpect(jsonPath("$.totalElements").value(totalOrders))
         .andExpect(jsonPath("$.totalPages").value(1));
+  }
+
+  @Test
+  @DisplayName("PATCH /api/v1/freight-orders/{id}/discount → 200 OK")
+  void updateDiscount_returnsUpdatedOrder() throws Exception {
+    CreateFreightOrderRequest request = new CreateFreightOrderRequest();
+    request.setVoyageId(savedVoyage.getId());
+    request.setContainerId(savedContainer.getId());
+    request.setCustomerId(savedCustomer.getId());
+    request.setOrderedBy("ops-team");
+    request.setNotes("Urgent delivery");
+    FreightOrder order = freightOrderService.createOrder(request);
+
+    UpdateDiscountRequest updateDiscountRequest = new UpdateDiscountRequest();
+    updateDiscountRequest.setDiscountPercent(BigDecimal.valueOf(10));
+    updateDiscountRequest.setReason("Loyal customer");
+
+    mockMvc
+        .perform(
+            patch("/api/v1/freight-orders/{id}/discount", order.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDiscountRequest)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.discountPercent").value(10))
+        .andExpect(jsonPath("$.discountReason").value("Loyal customer"))
+        .andExpect(jsonPath("$.finalPrice").value(900.00));
+  }
+
+  @Test
+  @DisplayName("PATCH /api/v1/freight-orders/{id}/discount → 404 Not Found")
+  void updateDiscount_orderNotFound() throws Exception {
+    UpdateDiscountRequest request = new UpdateDiscountRequest();
+    request.setDiscountPercent(BigDecimal.valueOf(10));
+    request.setReason("Test");
+
+    mockMvc
+        .perform(
+            patch("/api/v1/freight-orders/{id}/discount", 9999L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("PATCH /api/v1/freight-orders/{id}/discount → 400 Bad Request (invalid input)")
+  void updateDiscount_invalidRequest() throws Exception {
+    CreateFreightOrderRequest request = new CreateFreightOrderRequest();
+    request.setVoyageId(savedVoyage.getId());
+    request.setContainerId(savedContainer.getId());
+    request.setCustomerId(savedCustomer.getId());
+    request.setOrderedBy("ops-team");
+    request.setNotes("Urgent delivery");
+    FreightOrder order = freightOrderService.createOrder(request);
+
+    UpdateDiscountRequest updateDiscountRequest = new UpdateDiscountRequest();
+    updateDiscountRequest.setDiscountPercent(BigDecimal.valueOf(150));
+    updateDiscountRequest.setReason("");
+
+    mockMvc
+        .perform(
+            patch("/api/v1/freight-orders/{id}/discount", order.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDiscountRequest)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("PATCH /api/v1/freight-orders/{id}/discount → 409 Conflict (invalid state)")
+  void updateDiscount_invalidState() throws Exception {
+    CreateFreightOrderRequest request = new CreateFreightOrderRequest();
+    request.setVoyageId(savedVoyage.getId());
+    request.setContainerId(savedContainer.getId());
+    request.setCustomerId(savedCustomer.getId());
+    request.setOrderedBy("ops-team");
+    request.setNotes("Urgent delivery");
+    FreightOrder order = freightOrderService.createOrder(request);
+
+    order.setStatus(OrderStatus.CANCELLED);
+    freightOrderRepository.save(order);
+
+    UpdateDiscountRequest updateDiscountRequest = new UpdateDiscountRequest();
+    updateDiscountRequest.setDiscountPercent(BigDecimal.valueOf(10));
+    updateDiscountRequest.setReason("Test");
+
+    mockMvc
+        .perform(
+            patch("/api/v1/freight-orders/{id}/discount", order.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDiscountRequest)))
+        .andExpect(status().isConflict());
   }
 }

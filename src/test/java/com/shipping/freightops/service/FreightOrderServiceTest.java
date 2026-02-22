@@ -4,9 +4,11 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import com.shipping.freightops.dto.CreateFreightOrderRequest;
+import com.shipping.freightops.dto.UpdateDiscountRequest;
 import com.shipping.freightops.entity.*;
 import com.shipping.freightops.enums.ContainerSize;
 import com.shipping.freightops.enums.ContainerType;
+import com.shipping.freightops.enums.OrderStatus;
 import com.shipping.freightops.enums.VoyageStatus;
 import com.shipping.freightops.exception.BadRequestException;
 import com.shipping.freightops.repository.*;
@@ -147,5 +149,110 @@ public class FreightOrderServiceTest {
 
     assertThatThrownBy(() -> freightOrderService.createOrder(request))
         .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  @DisplayName("updateDiscount → updates discount and recalculates price")
+  void updateDiscount_appliesCorrectly() {
+    CreateFreightOrderRequest request = new CreateFreightOrderRequest();
+    request.setVoyageId(savedVoyage.getId());
+    request.setContainerId(savedContainer.getId());
+    request.setCustomerId(savedCustomer.getId());
+    request.setOrderedBy("tester");
+
+    FreightOrder order = freightOrderService.createOrder(request);
+
+    UpdateDiscountRequest update = new UpdateDiscountRequest();
+    update.setDiscountPercent(BigDecimal.valueOf(11));
+    update.setReason("Promo");
+
+    FreightOrder updated = freightOrderService.updateDiscount(order.getId(), update);
+
+    assertThat(updated.getDiscountPercent()).isEqualByComparingTo("11");
+    assertThat(updated.getDiscountReason()).isEqualTo("Promo");
+    assertThat(updated.getFinalPrice()).isEqualByComparingTo("890");
+  }
+
+  @Test
+  @DisplayName("updateDiscount → throws when order is cancelled")
+  void updateDiscount_whenCancelled_throws() {
+    CreateFreightOrderRequest request = new CreateFreightOrderRequest();
+    request.setVoyageId(savedVoyage.getId());
+    request.setContainerId(savedContainer.getId());
+    request.setCustomerId(savedCustomer.getId());
+    request.setOrderedBy("tester");
+
+    FreightOrder order = freightOrderService.createOrder(request);
+
+    order.setStatus(OrderStatus.CANCELLED);
+    freightOrderRepository.save(order);
+
+    UpdateDiscountRequest update = new UpdateDiscountRequest();
+    update.setDiscountPercent(BigDecimal.valueOf(10));
+    update.setReason("Test");
+
+    assertThatThrownBy(() -> freightOrderService.updateDiscount(order.getId(), update))
+        .isInstanceOf(IllegalStateException.class);
+  }
+
+  @Test
+  @DisplayName("updateDiscount → throws when order not found")
+  void updateDiscount_notFound_throws() {
+    UpdateDiscountRequest update = new UpdateDiscountRequest();
+    update.setDiscountPercent(BigDecimal.valueOf(10));
+    update.setReason("Test");
+
+    assertThatThrownBy(() -> freightOrderService.updateDiscount(999L, update))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  @DisplayName("updateDiscount → recalculates final price correctly for different values")
+  void updateDiscount_recalculatesFinalPrice() {
+    CreateFreightOrderRequest request = new CreateFreightOrderRequest();
+    request.setVoyageId(savedVoyage.getId());
+    request.setContainerId(savedContainer.getId());
+    request.setCustomerId(savedCustomer.getId());
+    request.setOrderedBy("tester");
+
+    FreightOrder order = freightOrderService.createOrder(request);
+
+    UpdateDiscountRequest update = new UpdateDiscountRequest();
+    update.setReason("Test");
+
+    // 10%
+    update.setDiscountPercent(BigDecimal.valueOf(10));
+    FreightOrder updated = freightOrderService.updateDiscount(order.getId(), update);
+    assertThat(updated.getFinalPrice()).isEqualByComparingTo("900");
+
+    // 25%
+    update.setDiscountPercent(BigDecimal.valueOf(25));
+    updated = freightOrderService.updateDiscount(order.getId(), update);
+    assertThat(updated.getFinalPrice()).isEqualByComparingTo("750");
+
+    // 0%
+    update.setDiscountPercent(BigDecimal.ZERO);
+    updated = freightOrderService.updateDiscount(order.getId(), update);
+    assertThat(updated.getFinalPrice()).isEqualByComparingTo("1000");
+  }
+
+  @Test
+  @DisplayName("updateDiscount → 100% discount results in zero price")
+  void updateDiscount_fullDiscount() {
+    CreateFreightOrderRequest request = new CreateFreightOrderRequest();
+    request.setVoyageId(savedVoyage.getId());
+    request.setContainerId(savedContainer.getId());
+    request.setCustomerId(savedCustomer.getId());
+    request.setOrderedBy("tester");
+
+    FreightOrder order = freightOrderService.createOrder(request);
+
+    UpdateDiscountRequest update = new UpdateDiscountRequest();
+    update.setDiscountPercent(BigDecimal.valueOf(100));
+    update.setReason("Free");
+
+    FreightOrder updated = freightOrderService.updateDiscount(order.getId(), update);
+
+    assertThat(updated.getFinalPrice()).isEqualByComparingTo("0");
   }
 }
