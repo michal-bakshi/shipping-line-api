@@ -65,6 +65,8 @@ public class VoyageControllerTest {
     voyage.setDepartureTime(LocalDateTime.now());
     voyage.setDeparturePort(port);
     voyage.setArrivalPort(port2);
+    voyage.setMaxCapacityTeu(vessel.getCapacityTeu());
+    voyage.setBookingOpen(true);
     this.voyage = voyageRepository.save(voyage);
   }
 

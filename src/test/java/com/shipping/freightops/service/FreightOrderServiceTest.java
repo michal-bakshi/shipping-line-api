@@ -59,6 +59,8 @@ public class FreightOrderServiceTest {
     voyage.setArrivalPort(arrival);
     voyage.setDepartureTime(LocalDateTime.now().plusDays(3));
     voyage.setArrivalTime(LocalDateTime.now().plusDays(10));
+    voyage.setMaxCapacityTeu(vessel.getCapacityTeu());
+    voyage.setBookingOpen(true);
     savedVoyage = voyageRepository.save(voyage);
 
     savedContainer =

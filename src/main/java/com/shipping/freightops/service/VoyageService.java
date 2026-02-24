@@ -57,6 +57,8 @@ public class VoyageService {
     voyage.setDeparturePort(departurePort);
     voyage.setDepartureTime(voyageRequest.getDepartureTime());
     voyage.setArrivalTime(voyageRequest.getArrivalTime());
+    voyage.setBookingOpen(true);
+    voyage.setMaxCapacityTeu(vessel.getCapacityTeu());
     return voyage;
   }
 
