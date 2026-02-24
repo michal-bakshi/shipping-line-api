@@ -1,5 +1,6 @@
 package com.shipping.freightops.service;
 
+import com.shipping.freightops.dto.BookingStatusUpdateRequest;
 import com.shipping.freightops.dto.CreateVoyageRequest;
 import com.shipping.freightops.dto.VoyagePriceRequest;
 import com.shipping.freightops.entity.*;
@@ -151,5 +152,14 @@ public class VoyageService {
                   case FORTY_FOOT -> 2;
                 })
         .sum();
+  }
+
+  public Voyage updateBookingStatus(Long voyageId, BookingStatusUpdateRequest request) {
+    Voyage voyage =
+        voyageRepository
+            .findById(voyageId)
+            .orElseThrow(() -> new IllegalArgumentException("Voyage not found"));
+    voyage.setBookingOpen(request.isBookingOpen());
+    return voyageRepository.save(voyage);
   }
 }

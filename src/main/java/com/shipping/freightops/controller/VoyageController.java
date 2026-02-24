@@ -127,4 +127,16 @@ public class VoyageController {
     return ResponseEntity.ok(
         LoadSummaryResponse.fromEntity(voyage, currentLoadTeu, containerCount));
   }
+
+  @Operation(summary = "Update voyage status")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "Voyage status updated"),
+    @ApiResponse(responseCode = "404", description = "Voyage not found")
+  })
+  @PatchMapping("/{voyageId}/booking-status")
+  public ResponseEntity<VoyageResponse> updateBookingStatus(
+      @PathVariable Long voyageId, @RequestBody BookingStatusUpdateRequest request) {
+    Voyage voyage = voyageService.updateBookingStatus(voyageId, request);
+    return ResponseEntity.ok(new VoyageResponse(voyage));
+  }
 }
