@@ -1,6 +1,5 @@
 # Freight Operations API
 
-<!-- Replace YOUR_ORG/YOUR_REPO with your actual GitHub path -->
 ![CI](https://github.com/hajk1/shipping-line-api/actions/workflows/ci.yml/badge.svg)
 ![Java](https://img.shields.io/badge/Java-21+-blue?logo=openjdk)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.5-green?logo=springboot)
