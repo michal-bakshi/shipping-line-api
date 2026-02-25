@@ -128,4 +128,32 @@ public class VoyageController {
     Page<VoyagePriceResponse> mapped = voyagePrices.map(VoyagePriceResponse::fromEntity);
     return ResponseEntity.ok(PageResponse.from(mapped));
   }
+
+  @Operation(summary = "Get load summary for a voyage")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "Voyage load retrieved"),
+    @ApiResponse(responseCode = "404", description = "Voyage not found")
+  })
+  @GetMapping("/{voyageId}/load")
+  public ResponseEntity<LoadSummaryResponse> getLoadSummary(@PathVariable Long voyageId) {
+    Voyage voyage = voyageService.getById(voyageId);
+    List<FreightOrder> orders = voyageService.getActiveOrdersForVoyage(voyageId);
+    int currentLoadTeu = voyageService.calculateCurrentLoadTeu(orders);
+    int containerCount = orders.size();
+
+    return ResponseEntity.ok(
+        LoadSummaryResponse.fromEntity(voyage, currentLoadTeu, containerCount));
+  }
+
+  @Operation(summary = "Update voyage status")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "Voyage status updated"),
+    @ApiResponse(responseCode = "404", description = "Voyage not found")
+  })
+  @PatchMapping("/{voyageId}/booking-status")
+  public ResponseEntity<VoyageResponse> updateBookingStatus(
+      @PathVariable Long voyageId, @RequestBody BookingStatusUpdateRequest request) {
+    Voyage voyage = voyageService.updateBookingStatus(voyageId, request);
+    return ResponseEntity.ok(new VoyageResponse(voyage));
+  }
 }

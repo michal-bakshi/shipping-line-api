@@ -76,6 +76,8 @@ class FreightOrderControllerTest {
     voyage.setArrivalPort(arrival);
     voyage.setDepartureTime(LocalDateTime.now().plusDays(3));
     voyage.setArrivalTime(LocalDateTime.now().plusDays(10));
+    voyage.setMaxCapacityTeu(vessel.getCapacityTeu());
+    voyage.setBookingOpen(true);
     savedVoyage = voyageRepository.save(voyage);
 
     savedContainer =
@@ -345,6 +347,29 @@ class FreightOrderControllerTest {
             patch("/api/v1/freight-orders/{id}/discount", order.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDiscountRequest)))
+        .andExpect(status().isConflict());
+  }
+
+  @Test
+  @DisplayName("POST /api/v1/freight-orders → 409 when booking is closed")
+  void createOrder_whenBookingClosed_returnsConflict() throws Exception {
+
+    savedVoyage.setBookingOpen(false);
+    voyageRepository.save(savedVoyage);
+
+    CreateFreightOrderRequest request = new CreateFreightOrderRequest();
+    request.setVoyageId(savedVoyage.getId());
+    request.setContainerId(savedContainer.getId());
+    request.setCustomerId(savedCustomer.getId());
+    request.setOrderedBy("ops-team");
+    request.setNotes("Urgent delivery");
+    request.setAgentId(savedAgent.getId());
+
+    mockMvc
+        .perform(
+            post("/api/v1/freight-orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isConflict());
   }
 }

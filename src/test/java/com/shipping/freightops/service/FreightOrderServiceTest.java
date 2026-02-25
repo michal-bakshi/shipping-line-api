@@ -63,6 +63,8 @@ public class FreightOrderServiceTest {
     voyage.setArrivalPort(arrival);
     voyage.setDepartureTime(LocalDateTime.now().plusDays(3));
     voyage.setArrivalTime(LocalDateTime.now().plusDays(10));
+    voyage.setMaxCapacityTeu(vessel.getCapacityTeu());
+    voyage.setBookingOpen(true);
     savedVoyage = voyageRepository.save(voyage);
 
     savedContainer =
@@ -273,5 +275,21 @@ public class FreightOrderServiceTest {
     FreightOrder updated = freightOrderService.updateDiscount(order.getId(), update);
 
     assertThat(updated.getFinalPrice()).isEqualByComparingTo("0");
+  }
+
+  @Test
+  @DisplayName("createOrder → throws when booking is closed")
+  void createOrder_whenBookingClosed_shouldThrowException() {
+    savedVoyage.setBookingOpen(false);
+    voyageRepository.save(savedVoyage);
+
+    CreateFreightOrderRequest request = new CreateFreightOrderRequest();
+    request.setVoyageId(savedVoyage.getId());
+    request.setContainerId(savedContainer.getId());
+    request.setCustomerId(savedCustomer.getId());
+    request.setOrderedBy("tester");
+
+    assertThatThrownBy(() -> freightOrderService.createOrder(request))
+        .isInstanceOf(IllegalStateException.class);
   }
 }
