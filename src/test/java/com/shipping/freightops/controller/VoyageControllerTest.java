@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shipping.freightops.dto.CreateVoyageRequest;
 import com.shipping.freightops.dto.VoyagePriceRequest;
 import com.shipping.freightops.entity.*;
+import com.shipping.freightops.enums.AgentType;
 import com.shipping.freightops.enums.ContainerSize;
 import com.shipping.freightops.enums.ContainerType;
 import com.shipping.freightops.repository.*;
@@ -37,11 +38,13 @@ public class VoyageControllerTest {
   @Autowired private ContainerRepository containerRepository;
   @Autowired private FreightOrderRepository freightOrderRepository;
   @Autowired private CustomerRepository customerRepository;
+  @Autowired private AgentRepository agentRepository;
 
   private Vessel vessel;
   private Port arrivalPort;
   private Port departurePort;
   private Voyage voyage;
+  private Agent agent;
   @Autowired private ObjectMapper objectMapper;
 
   @BeforeEach
@@ -53,6 +56,7 @@ public class VoyageControllerTest {
     customerRepository.deleteAll();
     vesselRepository.deleteAll();
     portRepository.deleteAll();
+    agentRepository.deleteAll();
     Port port = new Port("TGKRY", "kalgary", "Togo");
     Port port2 = new Port("JPTKY", "tokyo", "Japan");
     Vessel vessel = new Vessel("SeeFox", "111", 1);
@@ -67,6 +71,15 @@ public class VoyageControllerTest {
     voyage.setDeparturePort(port);
     voyage.setArrivalPort(port2);
     this.voyage = voyageRepository.save(voyage);
+
+    agent = new Agent();
+    agent.setActive(true);
+    agent.setName("Test Agent");
+    agent.setEmail("agent@somewhere.com");
+    agent.setType(AgentType.INTERNAL);
+    agent.setCommissionPercent(BigDecimal.TEN);
+    agentRepository.save(agent);
+
   }
 
   @Test
@@ -314,6 +327,8 @@ public class VoyageControllerTest {
     order.setBasePriceUsd(BigDecimal.valueOf(1000));
     order.setDiscountPercent(BigDecimal.ZERO);
     order.setFinalPrice(BigDecimal.valueOf(1000));
+    order.setAgent(agent);
+
     freightOrderRepository.save(order);
 
     mockMvc
