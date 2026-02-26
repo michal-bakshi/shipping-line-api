@@ -13,6 +13,12 @@ import org.springframework.stereotype.Service;
 public class BarcodeService {
   public byte[] generateBarcode(String content, int width, int height) {
     try {
+      if (content == null || content.isBlank()) {
+          throw new IllegalArgumentException("Content must not be null or blank");
+      }
+      if (width <= 0 || height <= 0) {
+          throw new IllegalArgumentException("Width and height must be positive");
+      }
       BitMatrix bitMatrix =
           new MultiFormatWriter().encode(content, BarcodeFormat.CODE_128, width, height);
 
@@ -27,6 +33,12 @@ public class BarcodeService {
 
   public byte[] generateQrCode(String content, int width, int height) {
     try {
+        if (content == null || content.isBlank()) {
+            throw new IllegalArgumentException("Content must not be null or blank");
+        }
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("Width and height must be positive");
+        }
       BitMatrix bitMatrix =
           new MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, width, height);
 
