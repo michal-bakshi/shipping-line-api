@@ -3,6 +3,8 @@ package com.shipping.freightops.repository;
 import com.shipping.freightops.entity.FreightOrder;
 import com.shipping.freightops.enums.OrderStatus;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +12,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface FreightOrderRepository extends JpaRepository<FreightOrder, Long> {
+
+  long countByVoyageId(Long voyageId);
 
   Page<FreightOrder> findByVoyageId(Long voyageId, Pageable pageable);
 
@@ -31,4 +35,13 @@ public interface FreightOrderRepository extends JpaRepository<FreightOrder, Long
     WHERE fo.voyage.id = :voyageId
 """)
   int sumTeuByVoyageId(@Param("voyageId") Long voyageId);
+
+  @Query(
+      """
+      SELECT f.voyage.id, COUNT(f)
+      FROM FreightOrder f
+      WHERE f.voyage.id IN :ids
+      GROUP BY f.voyage.id
+      """)
+  Map<Long, Long> countByVoyageIds(@Param("ids") List<Long> ids);
 }
