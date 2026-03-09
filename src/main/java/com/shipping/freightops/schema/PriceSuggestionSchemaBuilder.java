@@ -24,9 +24,8 @@ public class PriceSuggestionSchemaBuilder {
   }
 
   public String build() throws JsonProcessingException, IOException {
-    ObjectNode root = (ObjectNode) objectMapper.readTree(
-      new ClassPathResource(SCHEMA_PATH).getInputStream()
-  );
+    ObjectNode root =
+        (ObjectNode) objectMapper.readTree(new ClassPathResource(SCHEMA_PATH).getInputStream());
     ObjectNode properties = (ObjectNode) root.get("properties");
     ObjectNode confidence = (ObjectNode) properties.get("confidence");
     ArrayNode enumArray = objectMapper.createArrayNode();

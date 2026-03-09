@@ -4,7 +4,6 @@ import com.shipping.freightops.entity.FreightOrder;
 import com.shipping.freightops.enums.OrderStatus;
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

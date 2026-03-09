@@ -20,7 +20,6 @@ class PriceSuggestionSchemaTest {
   private ObjectMapper objectMapper;
   private static final SpecVersion.VersionFlag SCHEMA_VERSION = SpecVersion.VersionFlag.V202012;
 
-
   @BeforeEach
   void setUp() throws Exception {
     PriceSuggestionSchemaBuilder schemaBuilder =
