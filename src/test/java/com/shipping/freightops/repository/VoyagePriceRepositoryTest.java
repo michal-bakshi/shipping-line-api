@@ -49,7 +49,8 @@ class VoyagePriceRepositoryTest {
   class FindHistoricalPricesSameRoute {
 
     @Test
-    @DisplayName("returns voyage prices on the same route, ordered by departure time desc, excluding given voyage id")
+    @DisplayName(
+        "returns voyage prices on the same route, ordered by departure time desc, excluding given voyage id")
     void returnsSameRoutePricesOrderedAndExcludingCurrentVoyage() {
       Vessel vessel = vesselRepository.save(new Vessel("Vessel", "7654321", 200));
 
@@ -107,7 +108,8 @@ class VoyagePriceRepositoryTest {
   class FindHistoricalPricesSimilarRoute {
 
     @Test
-    @DisplayName("returns voyage prices where departure and arrival ports are within the provided sets, ordered by departure time desc")
+    @DisplayName(
+        "returns voyage prices where departure and arrival ports are within the provided sets, ordered by departure time desc")
     void returnsSimilarRoutePricesWithinPortSets() {
       Vessel vessel = vesselRepository.save(new Vessel("Vessel", "1357924", 200));
 
@@ -141,11 +143,7 @@ class VoyagePriceRepositoryTest {
   }
 
   private Voyage createVoyage(
-      String voyageNumber,
-      Vessel vessel,
-      Port departure,
-      Port arrival,
-      int daysAgoDeparture) {
+      String voyageNumber, Vessel vessel, Port departure, Port arrival, int daysAgoDeparture) {
     Voyage voyage = new Voyage();
     voyage.setVoyageNumber(voyageNumber);
     voyage.setVessel(vessel);
@@ -168,4 +166,3 @@ class VoyagePriceRepositoryTest {
     voyagePriceRepository.save(price);
   }
 }
-

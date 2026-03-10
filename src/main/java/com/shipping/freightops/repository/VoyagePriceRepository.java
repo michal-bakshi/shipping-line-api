@@ -16,7 +16,8 @@ public interface VoyagePriceRepository extends JpaRepository<VoyagePrice, Long> 
 
   Page<VoyagePrice> findByVoyageId(Long voyageId, Pageable pageable);
 
-  @Query("""
+  @Query(
+      """
     SELECT vp FROM VoyagePrice vp
     JOIN FETCH vp.voyage v
     JOIN FETCH v.departurePort
@@ -34,7 +35,8 @@ public interface VoyagePriceRepository extends JpaRepository<VoyagePrice, Long> 
       @Param("containerSize") ContainerSize containerSize,
       Pageable pageable);
 
-  @Query("""
+  @Query(
+      """
     SELECT vp FROM VoyagePrice vp
     JOIN FETCH vp.voyage v
     JOIN FETCH v.departurePort
