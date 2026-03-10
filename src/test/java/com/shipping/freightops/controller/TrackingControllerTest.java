@@ -136,4 +136,22 @@ public class TrackingControllerTest {
   void testTrackContainer_nonExistentCode_returnsNotFound() throws Exception {
     mockMvc.perform(get("/api/v1/track/container/UNKNOWN")).andExpect(status().isNotFound());
   }
+
+  @Test
+  @DisplayName(
+      "GET /api/v1/track/container/{containerCode} - container with no orders returns 200 with empty voyages")
+  void testTrackContainer_containerWithNoOrders_returnsOkWithEmptyVoyages() throws Exception {
+    containerRepository.save(
+        new Container("ORPHAN-001", ContainerSize.TWENTY_FOOT, ContainerType.DRY));
+    freightOrderRepository.deleteAll();
+
+    mockMvc
+        .perform(get("/api/v1/track/container/ORPHAN-001"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.containerCode").value("ORPHAN-001"))
+        .andExpect(jsonPath("$.containerSize").value("TWENTY_FOOT"))
+        .andExpect(jsonPath("$.containerType").value("DRY"))
+        .andExpect(jsonPath("$.voyages").isArray())
+        .andExpect(jsonPath("$.voyages").isEmpty());
+  }
 }

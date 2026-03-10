@@ -1,9 +1,11 @@
 package com.shipping.freightops.dto;
 
+import com.shipping.freightops.entity.Container;
 import com.shipping.freightops.entity.FreightOrder;
 import com.shipping.freightops.enums.ContainerSize;
 import com.shipping.freightops.enums.ContainerType;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ContainerTrackingResponse {
@@ -11,6 +13,17 @@ public class ContainerTrackingResponse {
   private ContainerSize containerSize;
   private ContainerType containerType;
   private List<VoyageTrackingResponse> voyages;
+
+  /** Creates a response for a container with no associated orders. */
+  public static ContainerTrackingResponse fromContainer(Container container) {
+    if (container == null) return null;
+    ContainerTrackingResponse dto = new ContainerTrackingResponse();
+    dto.containerCode = container.getContainerCode();
+    dto.containerSize = container.getSize();
+    dto.containerType = container.getType();
+    dto.voyages = Collections.emptyList();
+    return dto;
+  }
 
   public static ContainerTrackingResponse fromEntities(List<FreightOrder> orders) {
     if (orders == null || orders.isEmpty()) return null;
