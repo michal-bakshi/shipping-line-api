@@ -46,9 +46,7 @@ public class ContainerController {
 
   /** List all containers, optionally filtered by size and/or type. */
   @Operation(summary = "List all containers with optional size and type filters")
-  @ApiResponses({
-    @ApiResponse(responseCode = "200", description = "List of containers returned")
-  })
+  @ApiResponses({@ApiResponse(responseCode = "200", description = "List of containers returned")})
   @GetMapping
   public ResponseEntity<List<ContainerResponse>> list(
       @RequestParam(required = false) ContainerSize size,
